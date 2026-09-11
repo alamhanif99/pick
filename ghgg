@@ -1,0 +1,61 @@
+import os
+import tkinter as tk
+from tkinter import messagebox
+from gtts import gTTS
+import pygame
+
+# অডিও প্লে করার জন্য Pygame ইনিশিয়ালাইজ করা
+pygame.mixer.init()
+
+def play_voice():
+    text = text_area.get("1.0", tk.END).strip()
+    
+    if not text:
+        messagebox.showwarning("সতর্কতা", "দয়া করে কিছু টেক্সট লিখুন বা পেস্ট করুন!")
+        return
+
+    try:
+        # আগের ফাইল খোলা থাকলে তা বন্ধ করা
+        pygame.mixer.music.unload()
+        
+        # বাংলা নাকি ইংরেজি টেক্সট তা স্বয়ংক্রিয়ভাবে বুজে ভয়েস তৈরি (গুগল টিটিএস)
+        # ভাষা পরিবর্তন করতে চাইলে lang='bn' (বাংলা) বা lang='en' (ইংরেজি) দিতে পারেন
+        tts = gTTS(text=text, lang='bn', slow=False)
+        filename = "output.mp3"
+        tts.save(filename)
+        
+        # অডিও প্লে করা
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play()
+        
+        status_label.config(text="ভয়েস তৈরি সফল হয়েছে এবং প্লে হচ্ছে...", fg="green")
+    except Exception as e:
+        messagebox.showerror("ত্রুটি", f"সমস্যা হয়েছে: {e}")
+
+# জিইউআই (GUI) উইন্ডো তৈরি
+root = tk.Tk()
+root.title("Text to Voice Converter")
+root.geometry("500x450")
+root.config(bg="#f0f0f0")
+
+# শিরোনাম
+heading = tk.Label(root, text="টেক্সট থেকে ভয়েস কনভার্টার", font=("Arial", 16, "bold"), bg="#f0f0f0", fg="#333")
+heading.pack(pady=10)
+
+# ইনপুট বক্সের লেবেল
+instruction = tk.Label(root, text="নিচে আপনার টেক্সট লিখুন বা কপি-পেস্ট করুন:", font=("Arial", 11), bg="#f0f0f0")
+instruction.pack(anchor="w", padx=20)
+
+# টেক্সট এরিয়া (লেখা বা পেস্ট করার ঘর)
+text_area = tk.Text(root, font=("Arial", 12), wrap=tk.WORD, width=50, height=10)
+text_area.pack(padx=20, pady=10)
+
+# কনভার্ট বাটন
+convert_btn = tk.Button(root, text="Convert to Voice 🔊", font=("Arial", 12, "bold"), bg="#4CAF50", fg="white", padx=10, pady=5, command=play_voice)
+convert_btn.pack(pady=10)
+
+# স্ট্যাটাস লেবেল
+status_label = tk.Label(root, text="", font=("Arial", 10), bg="#f0f0f0")
+status_label.pack(pady=5)
+
+root.mainloop()
